@@ -14,12 +14,6 @@ Uniknya, aplikasi ini dibangun dengan **menerapkan struktur Atomic Design itu se
 * **Interactive Showcase:** Halaman detail yang mendemonstrasikan komponen UI secara langsung.
 * **Atomic Codebase:** Struktur kode yang terorganisir rapi sesuai metodologi Brad Frost.
 
-## 📸 Screenshots
-
-| Home Page | Detail Atom | Struktur Project |
-|:---------:|:-----------:|:----------------:|
-| ![Home](https://via.placeholder.com/200x400?text=Home+Screen) | ![Detail](https://via.placeholder.com/200x400?text=Detail+Page) | ![Struktur](https://via.placeholder.com/200x400?text=Folder+UI) |
-
 ## 🏗️ Struktur Arsitektur (The Core Concept)
 
 Proyek ini memisahkan komponen UI berdasarkan tingkat kompleksitasnya, mengikuti folder structure berikut:
@@ -43,4 +37,5 @@ com.nfy.guide_atomic_d
     ├── templates      # Kerangka layout halaman (Scaffold, TopBar)
     │   └── TemplateMainScreen.kt
     └── theme          # Warna, Typography, dan Tema Material 3
+
 
