@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -14,10 +15,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-// Import OrganismGuideCarousel
 import com.nfy.guide_atomic_d.ui.organisms.OrganismGuideCarousel
 import com.nfy.guide_atomic_d.ui.organisms.GuideItem
 import com.nfy.guide_atomic_d.ui.theme.Guide_Atomic_DTheme
@@ -93,19 +96,15 @@ fun OrganismLoginForm(modifier: Modifier = Modifier) {
     }
 }
 
-// Organism Sections (contoh jika Anda ingin memisahkannya)
-// Jika OrganismSections.kt ada di folder yang sama, importnya akan seperti ini
-// import com.nfy.guide_atomic_d.ui.organisms.OrganismGuideCarousel
-
 // Dummy HomePage and AtomDetailPage for compilation, replace with your actual implementations
 @Composable
-fun HomePage(modifier: Modifier = Modifier, onAtomClick: (String) -> Unit) { // Added onAtomClick parameter
+fun HomePage(modifier: Modifier = Modifier, onNavigateToDetail: (String) -> Unit) { // Renamed for clarity
     Column(modifier = modifier.padding(16.dp)) {
         Text("Home Page", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(16.dp))
-        AtomButton(text = "Go to Detail", onClick = { onAtomClick("someAtomId") }) // Example of using onAtomClick
+        AtomButton(text = "Go to Detail", onClick = { onNavigateToDetail("someAtomId") }) // Example of using navigation
         Spacer(modifier = Modifier.height(16.dp))
-        // Add other home page components here
+
         OrganismGuideCarousel(
             sectionTitle = "Featured Guides",
             items = listOf(
@@ -113,39 +112,154 @@ fun HomePage(modifier: Modifier = Modifier, onAtomClick: (String) -> Unit) { // 
                 GuideItem("Molecule", "Combinations of Atoms"),
                 GuideItem("Organism", "Complex UI parts")
             ),
+            onItemClick = { title -> onNavigateToDetail(title) }, // Pass title to callback
             modifier = Modifier.fillMaxWidth()
         )
     }
 }
 
-// AtomDetailPage now accepts atomId
+// AtomDetailPage now accepts atomId and displays relevant info
 @Composable
-fun AtomDetailPage(atomId: String?, modifier: Modifier = Modifier, onBackClick: () -> Unit) { // Added atomId and onBackClick parameters
-    Column(modifier = modifier.padding(16.dp)) {
-        Text("Atom Detail Page for: $atomId", style = MaterialTheme.typography.headlineMedium)
+fun AtomDetailPage(atomId: String?, modifier: Modifier = Modifier, onBackClick: () -> Unit) { // Added onBackClick parameter
+    Column(modifier = modifier.padding(16.dp).fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        // Displaying title based on atomId
+        val title = when (atomId) {
+            "Atom" -> "Guide to Atoms"
+            "Molecule" -> "Guide to Molecules"
+            "Organism" -> "Guide to Organisms"
+            else -> "Details for $atomId"
+        }
+        Text(title, style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(16.dp))
+
+        // Use a Card to contain the detailed content for better visual separation
+        Card(modifier = Modifier.fillMaxWidth(0.9f), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                val description = when (atomId) {
+                    "Atom" -> "Atoms are the basic building blocks of matter. In UI design, they represent the smallest indivisible UI elements like buttons, input fields, icons, etc."
+                    "Molecule" -> "Molecules are groups of Atoms bonded together. They are simple UI components composed of atoms, like a search form (label + input + button)."
+                    "Organism" -> "Organisms are relatively complex UI components composed of Molecules and/or Atoms. They form distinct sections of an interface, like a header, footer, or a complex data display."
+                    else -> "Details for $atomId"
+                }
+                Text(description, style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Displaying examples and copyable code
+                when (atomId) {
+                    "Atom" -> {
+                        ExampleSection(
+                            title = "Examples",
+                            codeSnippet = """ // Example: AtomButton 
+@Composable
+fun AtomButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(onClick = onClick, modifier = modifier) {
+        Text(text = text)
+    }
+}
+
+// Usage:
+// AtomButton(text = "Click Me", onClick = { /* do something */ })""",
+                            content = { // Content to be displayed interactively
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    AtomButton(text = "Sample Atom Button", onClick = { /* Placeholder action */ })
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    AtomInput(label = "Sample Atom Input", modifier = Modifier.fillMaxWidth())
+                                }
+                            }
+                        )
+                    }
+                    "Molecule" -> {
+                        ExampleSection(
+                            title = "Examples",
+                            codeSnippet = """ // Example: MoleculeLoginInput 
+@Composable
+fun MoleculeLoginInput(modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        AtomInput(label = "Username", modifier = Modifier.fillMaxWidth())
+        Spacer(modifier = Modifier.height(8.dp))
+        AtomInput(label = "Password", modifier = Modifier.fillMaxWidth())
+    }
+}
+
+// Usage:
+// MoleculeLoginInput()
+""",
+                            content = { // Content to be displayed interactively
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    MoleculeLoginInput(modifier = Modifier.fillMaxWidth())
+                                }
+                            }
+                        )
+                    }
+                    "Organism" -> {
+                        ExampleSection(
+                            title = "Examples",
+                            codeSnippet = """ // Example: OrganismLoginForm 
+@Composable
+fun OrganismLoginForm(modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        MoleculeLoginInput(modifier = Modifier.fillMaxWidth())
+        Spacer(modifier = Modifier.height(16.dp))
+        MoleculeLoginButton(modifier = Modifier.fillMaxWidth())
+    }
+}
+
+// Usage:
+// OrganismLoginForm()
+""",
+                            content = { // Content to be displayed interactively
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    OrganismLoginForm(modifier = Modifier.fillMaxWidth())
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
         AtomButton(text = "Back to Home", onClick = onBackClick)
     }
 }
 
-
+// Helper composable to display code snippets and interactive examples
 @Composable
-fun OrganismHomeContent(modifier: Modifier = Modifier) {
-    Column(modifier = modifier.padding(16.dp)) {
-        Text("Featured Items", style = MaterialTheme.typography.headlineSmall)
+fun ExampleSection(
+    title: String,
+    codeSnippet: String,
+    content: @Composable () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // Card for the code snippet
+        Card( 
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Text(
+                text = codeSnippet,
+                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                modifier = Modifier.padding(12.dp).fillMaxWidth()
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
-        AtomCarousel(items = listOf("Item 1", "Item 2", "Item 3"), modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text("Quick Actions", style = MaterialTheme.typography.headlineSmall)
-        Spacer(modifier = Modifier.height(16.dp))
-        AtomSlider(modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text("Highlights", style = MaterialTheme.typography.headlineSmall)
-        Spacer(modifier = Modifier.height(16.dp))
-        AtomCard(title = "Card 1", description = "This is the first card.", modifier = Modifier.fillMaxWidth())
-        AtomCard(title = "Card 2", description = "This is the second card.", modifier = Modifier.fillMaxWidth())
+        
+        // Content display (interactive example)
+        Text("Interactive Example:", style = MaterialTheme.typography.titleSmall)
+        Spacer(modifier = Modifier.height(8.dp))
+        Card( 
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(modifier = Modifier.padding(12.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                content()
+            }
+        }
     }
 }
 
@@ -158,9 +272,9 @@ fun TemplateLoginScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun TemplateHomeScreen(modifier: Modifier = Modifier) {
+fun TemplateHomeScreen(modifier: Modifier = Modifier, navigateToDetail: (String) -> Unit) {
     Scaffold(modifier = Modifier.fillMaxSize()) {
-        paddingValues -> OrganismHomeContent(modifier = modifier.padding(paddingValues))
+        paddingValues -> HomePage(modifier = modifier.padding(paddingValues), onNavigateToDetail = navigateToDetail)
     }
 }
 
@@ -171,25 +285,22 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Guide_Atomic_DTheme {
-                // State sederhana untuk mengatur halaman mana yang tampil
                 var currentScreen by remember { mutableStateOf("home") }
-                var selectedAtomId by remember { mutableStateOf<String?>(null) } // State untuk menyimpan ID atom yang dipilih
+                var selectedAtomId by remember { mutableStateOf<String?>(null) }
 
                 when (currentScreen) {
                     "home" -> {
-                        HomePage(
-                            onAtomClick = { atomId ->
-                                selectedAtomId = atomId // Simpan ID atom yang diklik
-                                currentScreen = "detail_atom" // Pindah ke halaman detail
+                        TemplateHomeScreen(
+                            navigateToDetail = { atomTitle ->
+                                selectedAtomId = atomTitle
+                                currentScreen = "detail_atom"
                             }
                         )
                     }
                     "detail_atom" -> {
                         AtomDetailPage(
-                            atomId = selectedAtomId, // Kirim ID atom ke halaman detail
-                            onBackClick = { // Panggil fungsi kembali
-                                currentScreen = "home" // Kembali ke halaman home
-                            }
+                            atomId = selectedAtomId,
+                            onBackClick = { currentScreen = "home" }
                         )
                     }
                 }
@@ -198,11 +309,59 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// Assuming OrganismGuideCarousel and GuideItem are defined in ui.organisms package
+// Example definitions if they are not in separate files:
+
+// Define GuideItem if not already defined
+data class GuideItem(val title: String, val desc: String)
+
+// Organism: Carousel
+@Composable
+fun OrganismGuideCarousel(
+    sectionTitle: String,
+    items: List<GuideItem>,
+    onItemClick: (String) -> Unit, // Callback for item clicks
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text(sectionTitle, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(horizontal = 16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(items) {
+                item ->
+                // Simulate a clickable card for each guide item
+                Card(
+                    modifier = Modifier
+                        .width(280.dp)
+                        .clickable { onItemClick(item.title) }, // Trigger callback on click
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(item.title, style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(item.desc, style = MaterialTheme.typography.bodyMedium)
+                        // Adding a placeholder button to mimic the image, but click is on the whole card
+                        Button(onClick = { onItemClick(item.title) }, modifier = Modifier.padding(top = 8.dp)) {
+                            Text("Pelajari")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     Guide_Atomic_DTheme {
-        TemplateHomeScreen()
+        TemplateHomeScreen(navigateToDetail = { /* no-op */ })
     }
 }
 
